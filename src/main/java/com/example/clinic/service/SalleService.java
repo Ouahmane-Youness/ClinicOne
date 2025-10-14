@@ -2,6 +2,7 @@ package com.example.clinic.service;
 
 import com.example.clinic.entities.Salle;
 import com.example.clinic.repository.SalleRepository;
+import com.example.clinic.service.Interface.ISalleService;
 
 import java.time.LocalDate;
 import java.time.LocalDateTime;
@@ -9,7 +10,7 @@ import java.time.LocalTime;
 import java.util.List;
 import java.util.Optional;
 
-public class SalleService {
+public class SalleService implements ISalleService {
 
     private final SalleRepository salleRepository;
 
@@ -17,6 +18,7 @@ public class SalleService {
         this.salleRepository = new SalleRepository();
     }
 
+    @Override
     public Salle createSalle(String nomSalle, Integer capacite) {
         if (nomSalle == null || nomSalle.trim().isEmpty()) {
             throw new IllegalArgumentException("Room name cannot be empty");
@@ -35,14 +37,17 @@ public class SalleService {
         return salleRepository.save(salle);
     }
 
+    @Override
     public Optional<Salle> getSalleById(Long id) {
         return salleRepository.findById(id);
     }
 
+    @Override
     public List<Salle> getAllSalles() {
         return salleRepository.findAll();
     }
 
+    @Override
     public Salle updateSalle(Long id, String nomSalle, Integer capacite) {
         Optional<Salle> existingSalle = salleRepository.findById(id);
 
@@ -67,6 +72,7 @@ public class SalleService {
         return salleRepository.update(salle);
     }
 
+    @Override
     public void deleteSalle(Long id) {
         Optional<Salle> salle = salleRepository.findById(id);
         if (salle.isEmpty()) {
@@ -75,6 +81,7 @@ public class SalleService {
         salleRepository.delete(id);
     }
 
+    @Override
     public boolean isRoomAvailable(Long salleId, LocalDate date, LocalTime time) {
         if (salleId == null || date == null || time == null) {
             throw new IllegalArgumentException("Room ID, date, and time cannot be null");
@@ -84,6 +91,7 @@ public class SalleService {
         return salleRepository.isRoomAvailable(salleId, dateTime);
     }
 
+    @Override
     public List<Salle> findAvailableRooms(LocalDate date, LocalTime time) {
         if (date == null || time == null) {
             throw new IllegalArgumentException("Date and time cannot be null");
@@ -93,6 +101,7 @@ public class SalleService {
         return salleRepository.findAvailableRooms(dateTime);
     }
 
+    @Override
     public void blockTimeSlot(Long salleId, LocalDate date, LocalTime time) {
         if (salleId == null || date == null || time == null) {
             throw new IllegalArgumentException("Room ID, date, and time cannot be null");
@@ -112,6 +121,7 @@ public class SalleService {
         salleRepository.addOccupiedSlot(salleId, dateTime);
     }
 
+    @Override
     public void freeTimeSlot(Long salleId, LocalDate date, LocalTime time) {
         if (salleId == null || date == null || time == null) {
             throw new IllegalArgumentException("Room ID, date, and time cannot be null");
@@ -121,6 +131,7 @@ public class SalleService {
         salleRepository.removeOccupiedSlot(salleId, dateTime);
     }
 
+    @Override
     public Salle findAnyAvailableRoom(LocalDate date, LocalTime time) {
         List<Salle> availableRooms = findAvailableRooms(date, time);
 
@@ -131,10 +142,12 @@ public class SalleService {
         return availableRooms.get(0);
     }
 
+    @Override
     public long getTotalSalles() {
         return salleRepository.count();
     }
 
+    @Override
     public List<LocalDateTime> getOccupiedSlots(Long salleId) {
         Optional<Salle> salle = salleRepository.findById(salleId);
         if (salle.isEmpty()) {
