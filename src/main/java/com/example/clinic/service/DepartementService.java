@@ -2,11 +2,12 @@ package com.example.clinic.service;
 
 import com.example.clinic.entities.Departement;
 import com.example.clinic.repository.DepartementRepository;
+import com.example.clinic.service.Interface.IDepartementService;
 
 import java.util.List;
 import java.util.Optional;
 
-public class DepartementService {
+public class DepartementService implements IDepartementService {
 
     private final DepartementRepository departementRepository;
 
@@ -14,6 +15,7 @@ public class DepartementService {
         this.departementRepository = new DepartementRepository();
     }
 
+    @Override
     public Departement createDepartement(String nom) {
         if (nom == null || nom.trim().isEmpty()) {
             throw new IllegalArgumentException("Department name cannot be empty");
@@ -28,10 +30,12 @@ public class DepartementService {
         return departementRepository.save(departement);
     }
 
+    @Override
     public Optional<Departement> getDepartementById(Long id) {
         return departementRepository.findById(id);
     }
 
+    @Override
     public Optional<Departement> getDepartementByNom(String nom) {
         if (nom == null || nom.trim().isEmpty()) {
             return Optional.empty();
@@ -39,10 +43,12 @@ public class DepartementService {
         return departementRepository.findByNom(nom.trim());
     }
 
+    @Override
     public List<Departement> getAllDepartements() {
         return departementRepository.findAll();
     }
 
+    @Override
     public List<Departement> searchDepartementsByNom(String nom) {
         if (nom == null || nom.trim().isEmpty()) {
             return List.of();
@@ -50,6 +56,7 @@ public class DepartementService {
         return departementRepository.searchByNom(nom.trim());
     }
 
+    @Override
     public Departement getDepartementWithDocteurs(Long id) {
         Departement departement = departementRepository.findByIdWithDocteurs(id);
         if (departement == null) {
@@ -58,6 +65,7 @@ public class DepartementService {
         return departement;
     }
 
+    @Override
     public Departement updateDepartement(Long id, String nom) {
         Optional<Departement> existingDept = departementRepository.findById(id);
 
@@ -80,6 +88,7 @@ public class DepartementService {
         return departementRepository.update(departement);
     }
 
+    @Override
     public void deleteDepartement(Long id) {
         Optional<Departement> departement = departementRepository.findById(id);
 
@@ -96,14 +105,17 @@ public class DepartementService {
         departementRepository.delete(id);
     }
 
+    @Override
     public long getTotalDepartements() {
         return departementRepository.count();
     }
 
+    @Override
     public boolean departementExists(String nom) {
         return departementRepository.findByNom(nom).isPresent();
     }
 
+    @Override
     public int getDocteurCount(Long departementId) {
         Departement dept = getDepartementWithDocteurs(departementId);
         return dept.getDocteurs().size();
