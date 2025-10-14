@@ -1,6 +1,7 @@
 package com.example.clinic.repository;
 
 import com.example.clinic.entities.Docteur;
+import com.example.clinic.repository.Irepository.Repository;
 import com.example.clinic.util.JPAUtil;
 import jakarta.persistence.EntityManager;
 import jakarta.persistence.EntityTransaction;
@@ -207,6 +208,39 @@ public class DocteurRepository implements Repository<Docteur, Long> {
             List<Docteur> results = query.getResultList();
             return results.isEmpty() ? null : results.get(0);
         } finally {
+            em.close();
+        }
+    }
+
+    // ✨ NEW: Find doctor assigned to a specific room
+    public Optional<Docteur> findBySalle(Long salleId)
+    {
+        EntityManager em = JPAUtil.getEntityManager();
+
+        try{
+            TypedQuery<Docteur> query = em.createQuery(
+                    "SELECT d FROM Docteur d WHERE d.salle.id = :salleId",
+                    Docteur.class
+            );
+            query.setParameter("salleId", salleId);
+            List<Docteur> results = query.getResultList();
+            return results.isEmpty() ? Optional.empty() : Optional.of(results.get(0));
+        }finally {
+            em.close();
+        }
+    }
+
+    // ✨ NEW: Find all doctors without assigned rooms
+    public List<Docteur> findDoctorsWithoutRoom()
+    {
+        EntityManager em = JPAUtil.getEntityManager();
+        try{
+            TypedQuery<Docteur> query = em.createQuery(
+                    "SELECT d FROM Docteur d where d.salle IS NULL", Docteur.class
+            );
+
+            return query.getResultList();
+        }finally {
             em.close();
         }
     }
