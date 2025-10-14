@@ -1,4 +1,4 @@
 package com.example.clinic.service.Interface;
 
-public interface IDocteurService {
+public interface test {
 }
