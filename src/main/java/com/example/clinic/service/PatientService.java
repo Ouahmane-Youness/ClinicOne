@@ -2,11 +2,12 @@ package com.example.clinic.service;
 
 import com.example.clinic.entities.Patient;
 import com.example.clinic.repository.PatientRepository;
+import com.example.clinic.service.Interface.IPatientService;
 
 import java.util.List;
 import java.util.Optional;
 
-public class PatientService {
+public class PatientService implements IPatientService {
 
     private final PatientRepository patientRepository;
 
@@ -14,6 +15,7 @@ public class PatientService {
         this.patientRepository = new PatientRepository();
     }
 
+    @Override
     public Patient registerPatient(String nom, String prenom, String email, String motDePasse,
                                    Double poids, Double taille) {
 
@@ -34,6 +36,7 @@ public class PatientService {
         return patientRepository.save(patient);
     }
 
+    @Override
     public Optional<Patient> authenticate(String email, String motDePasse) {
         Optional<Patient> patient = patientRepository.findByEmail(email);
 
@@ -44,14 +47,17 @@ public class PatientService {
         return Optional.empty();
     }
 
+    @Override
     public Optional<Patient> getPatientById(Long id) {
         return patientRepository.findById(id);
     }
 
+    @Override
     public List<Patient> getAllPatients() {
         return patientRepository.findAll();
     }
 
+    @Override
     public List<Patient> searchPatientsByNom(String nom) {
         if (nom == null || nom.trim().isEmpty()) {
             return List.of();
@@ -59,6 +65,7 @@ public class PatientService {
         return patientRepository.findByNom(nom.trim());
     }
 
+    @Override
     public Patient updatePatient(Long id, String nom, String prenom, Double poids, Double taille) {
         Optional<Patient> existingPatient = patientRepository.findById(id);
 
@@ -84,6 +91,7 @@ public class PatientService {
         return patientRepository.update(patient);
     }
 
+    @Override
     public boolean updatePassword(Long patientId, String oldPassword, String newPassword) {
         Optional<Patient> patientOpt = patientRepository.findById(patientId);
 
@@ -106,6 +114,7 @@ public class PatientService {
         return true;
     }
 
+    @Override
     public void deletePatient(Long id) {
         Optional<Patient> patient = patientRepository.findById(id);
         if (patient.isEmpty()) {
@@ -114,10 +123,12 @@ public class PatientService {
         patientRepository.delete(id);
     }
 
+    @Override
     public long getTotalPatients() {
         return patientRepository.count();
     }
 
+    @Override
     public boolean emailExists(String email) {
         return patientRepository.findByEmail(email).isPresent();
     }
