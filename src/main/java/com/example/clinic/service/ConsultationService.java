@@ -2,13 +2,15 @@ package com.example.clinic.service;
 
 import com.example.clinic.entities.*;
 import com.example.clinic.repository.*;
+import com.example.clinic.service.Interface.IConsultationService;
 
 import java.time.LocalDate;
 import java.time.LocalTime;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 
-public class ConsultationService {
+public class ConsultationService implements IConsultationService {
 
     private final ConsultationRepository consultationRepository;
     private final PatientRepository patientRepository;
@@ -22,10 +24,11 @@ public class ConsultationService {
         this.salleRepository = new SalleRepository();
     }
 
-    public Consultation bookConsultation(Long patientId, Long docteurId, Long salleId,
+    @Override
+    public Consultation bookConsultation(Long patientId, Long docteurId,
                                          LocalDate date, LocalTime time) {
 
-        if (patientId == null || docteurId == null || salleId == null || date == null || time == null) {
+        if (patientId == null || docteurId == null || date == null || time == null) {
             throw new IllegalArgumentException("All parameters are required");
         }
 
@@ -43,39 +46,35 @@ public class ConsultationService {
             throw new IllegalArgumentException("Doctor not found with ID: " + docteurId);
         }
 
-        Optional<Salle> salle = salleRepository.findById(salleId);
-        if (salle.isEmpty()) {
-            throw new IllegalArgumentException("Room not found with ID: " + salleId);
+        Salle doctorRoom = docteur.get().getSalle();
+        if (doctorRoom == null) {
+            throw new IllegalStateException("Doctor has no assigned room. Please contact administration.");
         }
 
-        if (!salleRepository.isRoomAvailable(salleId, date.atTime(time))) {
-            throw new IllegalStateException("Room is not available at the requested time");
+        if (!salleRepository.isRoomAvailable(doctorRoom.getIdSalle(), date.atTime(time))) {
+            throw new IllegalStateException("Doctor is not available at the requested time");
         }
 
         Consultation consultation = new Consultation(
                 date, time, StatutConsultation.RESERVEE,
-                patient.get(), docteur.get(), salle.get()
+                patient.get(), docteur.get(), doctorRoom
         );
 
         consultation = consultationRepository.save(consultation);
 
-        salleRepository.addOccupiedSlot(salleId, date.atTime(time));
+        salleRepository.addOccupiedSlot(doctorRoom.getIdSalle(), date.atTime(time));
 
         return consultation;
     }
 
+    @Override
     public Consultation bookConsultationWithAutoRoom(Long patientId, Long docteurId,
                                                      LocalDate date, LocalTime time) {
 
-        List<Salle> availableRooms = salleRepository.findAvailableRooms(date.atTime(time));
-
-        if (availableRooms.isEmpty()) {
-            throw new IllegalStateException("No rooms available for the requested time");
-        }
-
-        return bookConsultation(patientId, docteurId, availableRooms.get(0).getIdSalle(), date, time);
+        return bookConsultation(patientId, docteurId, date, time);
     }
 
+    @Override
     public Consultation validateConsultation(Long consultationId, Long docteurId) {
         Optional<Consultation> consultationOpt = consultationRepository.findById(consultationId);
 
@@ -97,6 +96,7 @@ public class ConsultationService {
         return consultationRepository.update(consultation);
     }
 
+    @Override
     public Consultation refuseConsultation(Long consultationId, Long docteurId) {
         Optional<Consultation> consultationOpt = consultationRepository.findById(consultationId);
 
@@ -125,6 +125,7 @@ public class ConsultationService {
         return updated;
     }
 
+    @Override
     public Consultation cancelConsultation(Long consultationId, Long patientId) {
         Optional<Consultation> consultationOpt = consultationRepository.findById(consultationId);
 
@@ -157,6 +158,7 @@ public class ConsultationService {
         return updated;
     }
 
+    @Override
     public Consultation completeConsultation(Long consultationId, Long docteurId, String compteRendu) {
         Optional<Consultation> consultationOpt = consultationRepository.findById(consultationId);
 
@@ -184,10 +186,12 @@ public class ConsultationService {
         return consultationRepository.update(consultation);
     }
 
+    @Override
     public Optional<Consultation> getConsultationById(Long id) {
         return consultationRepository.findById(id);
     }
 
+    @Override
     public Consultation getConsultationWithDetails(Long id) {
         Consultation consultation = consultationRepository.findByIdWithDetails(id);
         if (consultation == null) {
@@ -196,50 +200,62 @@ public class ConsultationService {
         return consultation;
     }
 
+    @Override
     public List<Consultation> getAllConsultations() {
         return consultationRepository.findAll();
     }
 
+    @Override
     public List<Consultation> getPatientConsultations(Long patientId) {
         return consultationRepository.findByPatient(patientId);
     }
 
+    @Override
     public List<Consultation> getDocteurConsultations(Long docteurId) {
         return consultationRepository.findByDocteur(docteurId);
     }
 
+    @Override
     public List<Consultation> getConsultationsByStatut(StatutConsultation statut) {
         return consultationRepository.findByStatut(statut);
     }
 
+    @Override
     public List<Consultation> getConsultationsByDate(LocalDate date) {
         return consultationRepository.findByDate(date);
     }
 
+    @Override
     public List<Consultation> getConsultationsInDateRange(LocalDate startDate, LocalDate endDate) {
         return consultationRepository.findByDateRange(startDate, endDate);
     }
 
+    @Override
     public List<Consultation> getUpcomingConsultationsForPatient(Long patientId) {
         return consultationRepository.findUpcomingByPatient(patientId, LocalDate.now());
     }
 
+    @Override
     public List<Consultation> getUpcomingConsultationsForDocteur(Long docteurId) {
         return consultationRepository.findUpcomingByDocteur(docteurId, LocalDate.now());
     }
 
+    @Override
     public List<Consultation> getPastConsultationsForPatient(Long patientId) {
         return consultationRepository.findPastByPatient(patientId, LocalDate.now());
     }
 
+    @Override
     public long getTotalConsultations() {
         return consultationRepository.count();
     }
 
+    @Override
     public long getConsultationCountByStatut(StatutConsultation statut) {
         return consultationRepository.countByStatut(statut);
     }
 
+    @Override
     public void deleteConsultation(Long id) {
         Optional<Consultation> consultationOpt = consultationRepository.findById(id);
 
@@ -257,6 +273,7 @@ public class ConsultationService {
         consultationRepository.delete(id);
     }
 
+    @Override
     public boolean canPatientBook(Long patientId, LocalDate date, LocalTime time) {
         List<Consultation> patientConsultations = consultationRepository.findByPatient(patientId);
 
@@ -272,8 +289,9 @@ public class ConsultationService {
         return true;
     }
 
+    @Override
     public Consultation rescheduleConsultation(Long consultationId, Long patientId,
-                                               LocalDate newDate, LocalTime newTime, Long newSalleId) {
+                                               LocalDate newDate, LocalTime newTime) {
 
         Optional<Consultation> consultationOpt = consultationRepository.findById(consultationId);
 
@@ -299,13 +317,13 @@ public class ConsultationService {
             throw new IllegalArgumentException("Cannot reschedule to a past date");
         }
 
-        Optional<Salle> newSalle = salleRepository.findById(newSalleId);
-        if (newSalle.isEmpty()) {
-            throw new IllegalArgumentException("Room not found with ID: " + newSalleId);
+        Salle doctorRoom = consultation.getDocteur().getSalle();
+        if (doctorRoom == null) {
+            throw new IllegalStateException("Doctor has no assigned room");
         }
 
-        if (!salleRepository.isRoomAvailable(newSalleId, newDate.atTime(newTime))) {
-            throw new IllegalStateException("New room is not available at the requested time");
+        if (!salleRepository.isRoomAvailable(doctorRoom.getIdSalle(), newDate.atTime(newTime))) {
+            throw new IllegalStateException("Doctor is not available at the new requested time");
         }
 
         salleRepository.removeOccupiedSlot(
@@ -315,13 +333,45 @@ public class ConsultationService {
 
         consultation.setDate(newDate);
         consultation.setHeure(newTime);
-        consultation.setSalle(newSalle.get());
+        consultation.setSalle(doctorRoom);
         consultation.setStatut(StatutConsultation.RESERVEE);
 
         Consultation updated = consultationRepository.update(consultation);
 
-        salleRepository.addOccupiedSlot(newSalleId, newDate.atTime(newTime));
+        salleRepository.addOccupiedSlot(doctorRoom.getIdSalle(), newDate.atTime(newTime));
 
         return updated;
+    }
+
+    @Override
+    public List<LocalTime> getAvailableTimeSlotsForDoctor(Long docteurId, LocalDate date) {
+        Optional<Docteur> docteurOpt = docteurRepository.findById(docteurId);
+        if (docteurOpt.isEmpty()) {
+            throw new IllegalArgumentException("Doctor not found with ID: " + docteurId);
+        }
+
+        Docteur docteur = docteurOpt.get();
+        Salle doctorRoom = docteur.getSalle();
+
+        if (doctorRoom == null) {
+            throw new IllegalStateException("Doctor has no assigned room");
+        }
+
+        List<java.time.LocalDateTime> occupiedSlots = doctorRoom.getCreneauxOccupes().stream()
+                .filter(slot -> slot.toLocalDate().equals(date))
+                .toList();
+
+        List<LocalTime> allTimeSlots = new ArrayList<>();
+        LocalTime start = LocalTime.of(9, 0);
+        LocalTime end = LocalTime.of(17, 0);
+
+        while (start.isBefore(end)) {
+            allTimeSlots.add(start);
+            start = start.plusMinutes(30);
+        }
+
+        return allTimeSlots.stream()
+                .filter(time -> !occupiedSlots.contains(date.atTime(time)))
+                .toList();
     }
 }
