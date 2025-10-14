@@ -1,6 +1,7 @@
 package com.example.clinic.repository;
 
 import com.example.clinic.entities.Patient;
+import com.example.clinic.repository.Irepository.Repository;
 import com.example.clinic.util.JPAUtil;
 import jakarta.persistence.EntityManager;
 import jakarta.persistence.EntityTransaction;
