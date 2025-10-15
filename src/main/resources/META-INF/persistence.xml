@@ -14,6 +14,8 @@
         <class>com.example.clinic.entities.Departement</class>
         <class>com.example.clinic.entities.Salle</class>
         <class>com.example.clinic.entities.Consultation</class>
+        <class>com.example.clinic.entities.Admin</class>
+
 
         <properties>
             <property name="jakarta.persistence.jdbc.driver" value="org.postgresql.Driver"/>

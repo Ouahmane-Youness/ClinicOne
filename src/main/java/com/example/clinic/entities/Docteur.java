@@ -15,6 +15,10 @@ public class Docteur extends Personne {
     @OneToMany(mappedBy = "docteur", cascade = CascadeType.ALL)
     private List<Consultation> consultations = new ArrayList<>();
 
+    @OneToOne
+    @JoinColumn(name = "salle_id")
+    private Salle salle;
+
     public Docteur() {
     }
 
@@ -22,6 +26,13 @@ public class Docteur extends Personne {
         super(nom, prenom, email, motDePasse);
         this.specialite = specialite;
         this.departement = departement;
+    }
+
+    public Docteur(String nom, String prenom, String email, String motDePasse, String specialite, Departement departement, Salle salle) {
+        super(nom, prenom, email, motDePasse);
+        this.specialite = specialite;
+        this.departement = departement;
+        this.salle = salle;
     }
 
     public String getSpecialite() {
@@ -46,5 +57,13 @@ public class Docteur extends Personne {
 
     public void setConsultations(List<Consultation> consultations) {
         this.consultations = consultations;
+    }
+
+    public Salle getSalle() {
+        return salle;
+    }
+
+    public void setSalle(Salle salle) {
+        this.salle = salle;
     }
 }

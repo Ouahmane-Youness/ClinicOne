@@ -1,4 +1,3 @@
-
 services:
   postgres:
     image: postgres:latest
@@ -19,6 +18,7 @@ services:
       interval: 10s
       timeout: 5s
       retries: 5
+
   pgadmin:
     image: dpage/pgadmin4:latest
     container_name: pgadmin_clinico
@@ -33,18 +33,23 @@ services:
     networks:
       - clinico-network
 
-
   tomcat_app:
-    build: .
-    container_name: tomcat_clinico
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: tomcat_clinico_dev
     depends_on:
       postgres:
         condition: service_healthy
-
     ports:
       - "8080:8080"
     networks:
       - clinico-network
+    volumes:
+      - ./src/main/webapp/WEB-INF/views:/usr/local/tomcat/webapps/ROOT/WEB-INF/views
+      - ./src/main/webapp/css:/usr/local/tomcat/webapps/ROOT/css
+      - ./src/main/webapp/images:/usr/local/tomcat/webapps/ROOT/images
+      - ./src/main/webapp/js:/usr/local/tomcat/webapps/ROOT/js
 
 volumes:
   postgres_data:
