@@ -48,6 +48,23 @@ public class SalleRepository implements Repository<Salle, Long> {
         }
     }
 
+    public Optional<Salle> findByIdWithCreneaux(Long id) {
+        EntityManager em = JPAUtil.getEntityManager();
+
+        try {
+            TypedQuery<Salle> query = em.createQuery(
+                    "SELECT s FROM Salle s LEFT JOIN FETCH s.creneauxOccupes WHERE s.idSalle = :id",
+                    Salle.class
+            );
+            query.setParameter("id", id);
+
+            List<Salle> results = query.getResultList();
+            return results.isEmpty() ? Optional.empty() : Optional.of(results.get(0));
+        } finally {
+            em.close();
+        }
+    }
+
     @Override
     public List<Salle> findAll() {
         EntityManager em = JPAUtil.getEntityManager();

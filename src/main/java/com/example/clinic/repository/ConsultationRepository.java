@@ -289,6 +289,21 @@ public class ConsultationRepository implements Repository<Consultation, Long> {
         }
     }
 
+    public List<Consultation> findCompletedByPatient(Long patientId) {
+        EntityManager em = JPAUtil.getEntityManager();
+
+        try {
+            TypedQuery<Consultation> query = em.createQuery(
+                    "SELECT c FROM Consultation c WHERE c.patient.id = :patientId AND (c.statut = 'TERMINEE' OR c.statut = 'ANNULEE') ORDER BY c.date DESC, c.heure DESC",
+                    Consultation.class
+            );
+            query.setParameter("patientId", patientId);
+            return query.getResultList();
+        } finally {
+            em.close();
+        }
+    }
+
     public Consultation findByIdWithDetails(Long id) {
         EntityManager em = JPAUtil.getEntityManager();
 

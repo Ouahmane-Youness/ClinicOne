@@ -49,7 +49,7 @@ public class PatientHistoryServlet extends HttpServlet {
 
         try {
             List<Consultation> pastConsultations =
-                    consultationService.getPastConsultationsForPatient(patientId);
+                    consultationService.getCompletedConsultationsForPatient(patientId);
 
             Map<Long, String> formattedDates = new HashMap<>();
             Map<Long, String> formattedShortDates = new HashMap<>();

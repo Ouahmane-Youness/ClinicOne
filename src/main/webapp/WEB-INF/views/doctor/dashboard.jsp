@@ -1,12 +1,11 @@
 <%@ page contentType="text/html;charset=UTF-8" language="java" %>
 <%@ taglib prefix="c" uri="jakarta.tags.core" %>
-<%@ taglib prefix="fmt" uri="jakarta.tags.fmt" %>
 <!DOCTYPE html>
 <html lang="en">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Doctor Dashboard - Clinico</title>
+    <title>Doctor Dashboard - Clinic</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
 </head>
@@ -16,257 +15,282 @@
     <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div class="flex justify-between h-16">
             <div class="flex items-center">
-                <div class="flex-shrink-0 flex items-center">
-                    <i class="fas fa-hospital-symbol text-3xl text-teal-600"></i>
-                    <span class="ml-2 text-2xl font-bold text-gray-800">Clinico</span>
-                </div>
-                <div class="hidden md:ml-10 md:flex md:space-x-8">
-                    <a href="${pageContext.request.contextPath}/doctor/dashboard" class="border-b-2 border-teal-500 text-gray-900 inline-flex items-center px-1 pt-1 text-sm font-medium">
-                        Dashboard
-                    </a>
-                    <a href="${pageContext.request.contextPath}/doctor/schedule" class="border-b-2 border-transparent text-gray-500 hover:border-gray-300 hover:text-gray-700 inline-flex items-center px-1 pt-1 text-sm font-medium">
-                        Schedule
-                    </a>
-                </div>
+                <i class="fas fa-hospital text-blue-600 text-2xl mr-3"></i>
+                <span class="text-xl font-bold text-gray-800">Clinic Management</span>
             </div>
-            <div class="flex items-center">
+            <div class="flex items-center space-x-4">
+                <a href="${pageContext.request.contextPath}/doctor/dashboard"
+                   class="text-gray-700 hover:text-blue-600 px-3 py-2 rounded-md font-medium">
+                    <i class="fas fa-home mr-2"></i>Dashboard
+                </a>
+                <a href="${pageContext.request.contextPath}/doctor/schedule"
+                   class="text-gray-700 hover:text-blue-600 px-3 py-2 rounded-md font-medium">
+                    <i class="fas fa-calendar-alt mr-2"></i>Schedule
+                </a>
                 <div class="flex items-center space-x-3">
                     <div class="text-right">
-                        <p class="text-sm font-medium text-gray-700">Dr. ${docteur.nom}</p>
+                        <p class="text-sm font-medium text-gray-700">Dr. ${docteur.nom} ${docteur.prenom}</p>
                         <p class="text-xs text-gray-500">${docteur.specialite}</p>
                     </div>
-                    <div class="h-10 w-10 rounded-full bg-gradient-to-r from-teal-500 to-teal-600 flex items-center justify-center text-white font-semibold">
-                        ${docteur.prenom.substring(0,1)}${docteur.nom.substring(0,1)}
-                    </div>
+                    <form action="${pageContext.request.contextPath}/logout" method="post" class="inline">
+                        <button type="submit"
+                                class="bg-red-500 hover:bg-red-600 text-white px-4 py-2 rounded-lg transition duration-200">
+                            <i class="fas fa-sign-out-alt mr-2"></i>Logout
+                        </button>
+                    </form>
                 </div>
-                <a href="${pageContext.request.contextPath}/logout" class="ml-4 text-gray-500 hover:text-gray-700">
-                    <i class="fas fa-sign-out-alt text-xl"></i>
-                </a>
             </div>
         </div>
     </div>
 </nav>
 
-<main class="max-w-7xl mx-auto py-6 sm:px-6 lg:px-8">
+<div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
 
-    <div class="px-4 py-6 sm:px-0">
-        <div class="mb-6">
-            <h1 class="text-3xl font-bold text-gray-900">Welcome back, Dr. ${docteur.nom}!</h1>
-            <p class="mt-1 text-sm text-gray-600">${docteur.departement.nom} Department • Room ${docteur.salle != null ? docteur.salle.nomSalle : 'Not Assigned'}</p>
+    <div class="mb-8">
+        <h1 class="text-3xl font-bold text-gray-800">Welcome, Dr. ${docteur.nom}</h1>
+        <p class="text-gray-600 mt-2">Manage your consultations and patient appointments</p>
+    </div>
+
+    <c:if test="${not empty param.success}">
+        <div class="bg-green-100 border-l-4 border-green-500 text-green-700 p-4 mb-6 rounded">
+            <div class="flex">
+                <i class="fas fa-check-circle mt-1 mr-3"></i>
+                <p>${param.success}</p>
+            </div>
         </div>
+    </c:if>
 
-        <c:if test="${not empty param.success}">
-            <div class="mb-6 bg-green-50 border-l-4 border-green-400 p-4 rounded-lg">
-                <div class="flex">
-                    <i class="fas fa-check-circle text-green-400 text-xl"></i>
-                    <p class="ml-3 text-sm text-green-700">${param.success}</p>
-                </div>
+    <c:if test="${not empty param.error}">
+        <div class="bg-red-100 border-l-4 border-red-500 text-red-700 p-4 mb-6 rounded">
+            <div class="flex">
+                <i class="fas fa-exclamation-circle mt-1 mr-3"></i>
+                <p>${param.error}</p>
             </div>
-        </c:if>
+        </div>
+    </c:if>
 
-        <c:if test="${not empty param.error}">
-            <div class="mb-6 bg-red-50 border-l-4 border-red-400 p-4 rounded-lg">
-                <div class="flex">
-                    <i class="fas fa-exclamation-circle text-red-400 text-xl"></i>
-                    <p class="ml-3 text-sm text-red-700">${param.error}</p>
-                </div>
+    <c:if test="${not empty error}">
+        <div class="bg-red-100 border-l-4 border-red-500 text-red-700 p-4 mb-6 rounded">
+            <div class="flex">
+                <i class="fas fa-exclamation-circle mt-1 mr-3"></i>
+                <p>${error}</p>
             </div>
-        </c:if>
+        </div>
+    </c:if>
 
-        <div class="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
-            <div class="bg-gradient-to-br from-teal-500 to-teal-600 rounded-2xl shadow-lg p-6 text-white">
-                <div class="flex items-center justify-between">
-                    <div>
-                        <p class="text-teal-100 text-sm font-medium">Today's</p>
-                        <p class="text-3xl font-bold mt-2">${todayConsultations.size()}</p>
-                        <p class="text-teal-100 text-xs mt-1">Consultations</p>
-                    </div>
-                    <div class="bg-white/20 rounded-full p-4">
-                        <i class="fas fa-calendar-day text-3xl"></i>
-                    </div>
+    <div class="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
+
+        <div class="bg-white rounded-lg shadow-md p-6 border-l-4 border-yellow-500">
+            <div class="flex items-center justify-between">
+                <div>
+                    <p class="text-gray-500 text-sm font-medium uppercase">Pending Validations</p>
+                    <p class="text-3xl font-bold text-gray-800 mt-2">
+                        <c:choose>
+                            <c:when test="${not empty pendingValidations}">
+                                ${pendingValidations.size()}
+                            </c:when>
+                            <c:otherwise>
+                                0
+                            </c:otherwise>
+                        </c:choose>
+                    </p>
                 </div>
-            </div>
-
-            <div class="bg-gradient-to-br from-yellow-500 to-yellow-600 rounded-2xl shadow-lg p-6 text-white">
-                <div class="flex items-center justify-between">
-                    <div>
-                        <p class="text-yellow-100 text-sm font-medium">Pending</p>
-                        <p class="text-3xl font-bold mt-2">${pendingValidations.size()}</p>
-                        <p class="text-yellow-100 text-xs mt-1">Validations</p>
-                    </div>
-                    <div class="bg-white/20 rounded-full p-4">
-                        <i class="fas fa-clock text-3xl"></i>
-                    </div>
-                </div>
-            </div>
-
-            <div class="bg-gradient-to-br from-purple-500 to-purple-600 rounded-2xl shadow-lg p-6 text-white">
-                <div class="flex items-center justify-between">
-                    <div>
-                        <p class="text-purple-100 text-sm font-medium">Upcoming</p>
-                        <p class="text-3xl font-bold mt-2">${upcomingConsultations.size()}</p>
-                        <p class="text-purple-100 text-xs mt-1">Appointments</p>
-                    </div>
-                    <div class="bg-white/20 rounded-full p-4">
-                        <i class="fas fa-calendar-check text-3xl"></i>
-                    </div>
+                <div class="bg-yellow-100 rounded-full p-4">
+                    <i class="fas fa-clock text-yellow-600 text-2xl"></i>
                 </div>
             </div>
         </div>
 
-        <c:if test="${not empty pendingValidations}">
-            <div class="bg-white rounded-2xl shadow-lg overflow-hidden mb-8">
-                <div class="px-6 py-5 border-b border-gray-200 bg-gradient-to-r from-yellow-50 to-white">
-                    <h2 class="text-xl font-bold text-gray-800 flex items-center">
-                        <i class="fas fa-hourglass-half text-yellow-600 mr-3"></i>
-                        Pending Validations
-                    </h2>
+        <div class="bg-white rounded-lg shadow-md p-6 border-l-4 border-blue-500">
+            <div class="flex items-center justify-between">
+                <div>
+                    <p class="text-gray-500 text-sm font-medium uppercase">Today's Appointments</p>
+                    <p class="text-3xl font-bold text-gray-800 mt-2">
+                        <c:choose>
+                            <c:when test="${not empty todayConsultations}">
+                                ${todayConsultations.size()}
+                            </c:when>
+                            <c:otherwise>
+                                0
+                            </c:otherwise>
+                        </c:choose>
+                    </p>
                 </div>
+                <div class="bg-blue-100 rounded-full p-4">
+                    <i class="fas fa-calendar-day text-blue-600 text-2xl"></i>
+                </div>
+            </div>
+        </div>
 
-                <div class="p-6 space-y-4">
-                    <c:forEach items="${pendingValidations}" var="consultation">
-                        <div class="border-l-4 border-yellow-500 bg-gradient-to-r from-yellow-50 to-white rounded-lg p-5">
-                            <div class="flex items-start justify-between">
-                                <div class="flex-1">
-                                    <div class="flex items-center space-x-4">
-                                        <div class="bg-yellow-100 rounded-full p-3">
-                                            <i class="fas fa-user text-yellow-600 text-xl"></i>
-                                        </div>
-                                        <div>
-                                            <h3 class="text-lg font-bold text-gray-800">${consultation.patient.prenom} ${consultation.patient.nom}</h3>
-                                            <div class="flex items-center space-x-4 mt-2 text-sm text-gray-600">
-                                                <div class="flex items-center">
-                                                    <i class="fas fa-calendar text-yellow-500 mr-2"></i>
-                                                    <fmt:formatDate value="${consultation.date}" pattern="MMM dd, yyyy"/>
-                                                </div>
-                                                <div class="flex items-center">
-                                                    <i class="fas fa-clock text-yellow-500 mr-2"></i>
-                                                    <fmt:formatDate value="${consultation.heure}" pattern="HH:mm"/>
-                                                </div>
-                                                <div class="flex items-center">
-                                                    <i class="fas fa-door-open text-yellow-500 mr-2"></i>
-                                                    Room ${consultation.salle.nomSalle}
-                                                </div>
-                                            </div>
-                                        </div>
+        <div class="bg-white rounded-lg shadow-md p-6 border-l-4 border-green-500">
+            <div class="flex items-center justify-between">
+                <div>
+                    <p class="text-gray-500 text-sm font-medium uppercase">Upcoming</p>
+                    <p class="text-3xl font-bold text-gray-800 mt-2">
+                        <c:choose>
+                            <c:when test="${not empty upcomingConsultations}">
+                                ${upcomingConsultations.size()}
+                            </c:when>
+                            <c:otherwise>
+                                0
+                            </c:otherwise>
+                        </c:choose>
+                    </p>
+                </div>
+                <div class="bg-green-100 rounded-full p-4">
+                    <i class="fas fa-calendar-check text-green-600 text-2xl"></i>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <c:if test="${not empty pendingValidations}">
+        <div class="bg-white rounded-lg shadow-md p-6 mb-8">
+            <h2 class="text-2xl font-bold text-gray-800 mb-4 flex items-center">
+                <i class="fas fa-exclamation-circle text-yellow-500 mr-3"></i>
+                Pending Validations
+            </h2>
+            <div class="space-y-4">
+                <c:forEach var="consultation" items="${pendingValidations}">
+                    <div class="border border-yellow-200 rounded-lg p-4 bg-yellow-50 hover:shadow-md transition duration-200">
+                        <div class="flex justify-between items-start">
+                            <div class="flex-1">
+                                <h3 class="text-lg font-semibold text-gray-800">
+                                        ${consultation.patient.nom} ${consultation.patient.prenom}
+                                </h3>
+                                <div class="flex items-center space-x-4 mt-2 text-sm text-gray-600">
+                                    <div class="flex items-center">
+                                        <i class="fas fa-calendar text-yellow-500 mr-2"></i>
+                                            ${formattedShortDates[consultation.idConsultation]}
+                                    </div>
+                                    <div class="flex items-center">
+                                        <i class="fas fa-clock text-yellow-500 mr-2"></i>
+                                            ${formattedTimes[consultation.idConsultation]}
+                                    </div>
+                                    <div class="flex items-center">
+                                        <i class="fas fa-door-open text-yellow-500 mr-2"></i>
+                                        Room ${consultation.salle.nomSalle}
                                     </div>
                                 </div>
+                            </div>
+                            <div class="flex space-x-2 ml-4">
+                                <form action="${pageContext.request.contextPath}/doctor/validate-consultation"
+                                      method="post" class="inline">
+                                    <input type="hidden" name="consultationId" value="${consultation.idConsultation}"/>
+                                    <input type="hidden" name="action" value="validate"/>
+                                    <button type="submit"
+                                            class="bg-green-500 hover:bg-green-600 text-white px-4 py-2 rounded-lg transition duration-200">
+                                        <i class="fas fa-check mr-2"></i>Validate
+                                    </button>
+                                </form>
+                                <form action="${pageContext.request.contextPath}/doctor/validate-consultation"
+                                      method="post" class="inline">
+                                    <input type="hidden" name="consultationId" value="${consultation.idConsultation}"/>
+                                    <input type="hidden" name="action" value="refuse"/>
+                                    <button type="submit"
+                                            class="bg-red-500 hover:bg-red-600 text-white px-4 py-2 rounded-lg transition duration-200">
+                                        <i class="fas fa-times mr-2"></i>Refuse
+                                    </button>
+                                </form>
+                            </div>
+                        </div>
+                    </div>
+                </c:forEach>
+            </div>
+        </div>
+    </c:if>
 
-                                <div class="ml-4 flex space-x-2">
-                                    <form action="${pageContext.request.contextPath}/doctor/validate-consultation" method="post" class="inline">
-                                        <input type="hidden" name="consultationId" value="${consultation.idConsultation}">
-                                        <input type="hidden" name="action" value="validate">
-                                        <button type="submit" class="px-4 py-2 bg-green-500 hover:bg-green-600 text-white text-sm font-semibold rounded-lg transition">
-                                            <i class="fas fa-check mr-1"></i>
-                                            Accept
-                                        </button>
-                                    </form>
-                                    <form action="${pageContext.request.contextPath}/doctor/validate-consultation" method="post" class="inline" onsubmit="return confirm('Are you sure you want to refuse this consultation?');">
-                                        <input type="hidden" name="consultationId" value="${consultation.idConsultation}">
-                                        <input type="hidden" name="action" value="refuse">
-                                        <button type="submit" class="px-4 py-2 bg-red-500 hover:bg-red-600 text-white text-sm font-semibold rounded-lg transition">
-                                            <i class="fas fa-times mr-1"></i>
-                                            Refuse
-                                        </button>
-                                    </form>
+    <c:if test="${not empty todayConsultations}">
+        <div class="bg-white rounded-lg shadow-md p-6 mb-8">
+            <h2 class="text-2xl font-bold text-gray-800 mb-4 flex items-center">
+                <i class="fas fa-calendar-day text-blue-500 mr-3"></i>
+                Today's Appointments
+            </h2>
+            <div class="space-y-4">
+                <c:forEach var="consultation" items="${todayConsultations}">
+                    <div class="border border-blue-200 rounded-lg p-4 bg-blue-50 hover:shadow-md transition duration-200">
+                        <div class="flex justify-between items-start">
+                            <div class="flex-1">
+                                <h3 class="text-lg font-semibold text-gray-800">
+                                        ${consultation.patient.nom} ${consultation.patient.prenom}
+                                </h3>
+                                <div class="flex items-center space-x-4 mt-2 text-sm text-gray-600">
+                                    <div class="flex items-center">
+                                        <i class="fas fa-clock text-blue-500 mr-2"></i>
+                                            ${formattedTimes[consultation.idConsultation]}
+                                    </div>
+                                    <div class="flex items-center">
+                                        <i class="fas fa-door-open text-blue-500 mr-2"></i>
+                                        Room ${consultation.salle.nomSalle}
+                                    </div>
+                                    <div class="flex items-center">
+                                        <i class="fas fa-info-circle text-blue-500 mr-2"></i>
+                                            ${consultation.statut}
+                                    </div>
+                                </div>
+                            </div>
+                            <c:if test="${consultation.statut == 'VALIDEE'}">
+                                <a href="${pageContext.request.contextPath}/doctor/complete-consultation?consultationId=${consultation.idConsultation}"
+                                   class="bg-blue-500 hover:bg-blue-600 text-white px-4 py-2 rounded-lg transition duration-200">
+                                    <i class="fas fa-edit mr-2"></i>Complete
+                                </a>
+                            </c:if>
+                        </div>
+                    </div>
+                </c:forEach>
+            </div>
+        </div>
+    </c:if>
+
+    <c:if test="${not empty upcomingConsultations}">
+        <div class="bg-white rounded-lg shadow-md p-6">
+            <h2 class="text-2xl font-bold text-gray-800 mb-4 flex items-center">
+                <i class="fas fa-calendar-alt text-green-500 mr-3"></i>
+                Upcoming Appointments
+            </h2>
+            <div class="space-y-4">
+                <c:forEach var="consultation" items="${upcomingConsultations}">
+                    <div class="border border-gray-200 rounded-lg p-4 hover:shadow-md transition duration-200">
+                        <div class="flex justify-between items-start">
+                            <div class="flex-1">
+                                <h3 class="text-lg font-semibold text-gray-800">
+                                        ${consultation.patient.nom} ${consultation.patient.prenom}
+                                </h3>
+                                <div class="flex items-center space-x-4 mt-2 text-sm text-gray-600">
+                                    <div class="flex items-center">
+                                        <i class="fas fa-calendar text-gray-500 mr-2"></i>
+                                            ${formattedShortDates[consultation.idConsultation]}
+                                    </div>
+                                    <div class="flex items-center">
+                                        <i class="fas fa-clock text-gray-500 mr-2"></i>
+                                            ${formattedTimes[consultation.idConsultation]}
+                                    </div>
+                                    <div class="flex items-center">
+                                        <i class="fas fa-door-open text-gray-500 mr-2"></i>
+                                        Room ${consultation.salle.nomSalle}
+                                    </div>
+                                    <div class="flex items-center">
+                                        <i class="fas fa-info-circle text-gray-500 mr-2"></i>
+                                            ${consultation.statut}
+                                    </div>
                                 </div>
                             </div>
                         </div>
-                    </c:forEach>
-                </div>
-            </div>
-        </c:if>
-
-        <div class="bg-white rounded-2xl shadow-lg overflow-hidden">
-            <div class="px-6 py-5 border-b border-gray-200 bg-gradient-to-r from-gray-50 to-white">
-                <h2 class="text-xl font-bold text-gray-800 flex items-center">
-                    <i class="fas fa-calendar-alt text-teal-600 mr-3"></i>
-                    Today's Schedule
-                </h2>
-            </div>
-
-            <div class="p-6">
-                <c:choose>
-                    <c:when test="${empty todayConsultations}">
-                        <div class="text-center py-12">
-                            <i class="fas fa-calendar-check text-6xl text-gray-300 mb-4"></i>
-                            <p class="text-gray-500 text-lg">No consultations scheduled for today</p>
-                            <p class="text-gray-400 text-sm mt-2">Enjoy your day!</p>
-                        </div>
-                    </c:when>
-                    <c:otherwise>
-                        <div class="space-y-4">
-                            <c:forEach items="${todayConsultations}" var="consultation">
-                                <div class="border-l-4 ${consultation.statut == 'VALIDEE' ? 'border-green-500 bg-green-50' : consultation.statut == 'TERMINEE' ? 'border-blue-500 bg-blue-50' : 'border-gray-300 bg-gray-50'} rounded-lg p-5 hover:shadow-md transition">
-                                    <div class="flex items-start justify-between">
-                                        <div class="flex-1">
-                                            <div class="flex items-center space-x-4">
-                                                <div class="bg-teal-100 rounded-full p-3">
-                                                    <i class="fas fa-user text-teal-600 text-xl"></i>
-                                                </div>
-                                                <div>
-                                                    <h3 class="text-lg font-bold text-gray-800">${consultation.patient.prenom} ${consultation.patient.nom}</h3>
-                                                    <div class="flex items-center space-x-4 mt-2 text-sm text-gray-600">
-                                                        <div class="flex items-center">
-                                                            <i class="fas fa-clock text-teal-500 mr-2"></i>
-                                                            <fmt:formatDate value="${consultation.heure}" pattern="HH:mm"/>
-                                                        </div>
-                                                        <div class="flex items-center">
-                                                            <i class="fas fa-door-open text-teal-500 mr-2"></i>
-                                                            Room ${consultation.salle.nomSalle}
-                                                        </div>
-                                                    </div>
-                                                    <div class="mt-2">
-                                                        <c:choose>
-                                                            <c:when test="${consultation.statut == 'RESERVEE'}">
-                                                                    <span class="inline-flex items-center px-3 py-1 rounded-full text-xs font-semibold bg-yellow-100 text-yellow-800">
-                                                                        <i class="fas fa-clock mr-1"></i>
-                                                                        Pending
-                                                                    </span>
-                                                            </c:when>
-                                                            <c:when test="${consultation.statut == 'VALIDEE'}">
-                                                                    <span class="inline-flex items-center px-3 py-1 rounded-full text-xs font-semibold bg-green-100 text-green-800">
-                                                                        <i class="fas fa-check-circle mr-1"></i>
-                                                                        Confirmed
-                                                                    </span>
-                                                            </c:when>
-                                                            <c:when test="${consultation.statut == 'TERMINEE'}">
-                                                                    <span class="inline-flex items-center px-3 py-1 rounded-full text-xs font-semibold bg-blue-100 text-blue-800">
-                                                                        <i class="fas fa-check-double mr-1"></i>
-                                                                        Completed
-                                                                    </span>
-                                                            </c:when>
-                                                        </c:choose>
-                                                    </div>
-                                                </div>
-                                            </div>
-                                        </div>
-
-                                        <div class="ml-4 flex flex-col space-y-2">
-                                            <c:if test="${consultation.statut == 'VALIDEE'}">
-                                                <a href="${pageContext.request.contextPath}/doctor/complete-consultation?consultationId=${consultation.idConsultation}"
-                                                   class="px-4 py-2 bg-teal-500 hover:bg-teal-600 text-white text-sm font-semibold rounded-lg transition text-center">
-                                                    <i class="fas fa-file-medical mr-1"></i>
-                                                    Complete
-                                                </a>
-                                            </c:if>
-                                            <a href="${pageContext.request.contextPath}/doctor/patient-history?patientId=${consultation.patient.id}"
-                                               class="px-4 py-2 bg-purple-500 hover:bg-purple-600 text-white text-sm font-semibold rounded-lg transition text-center">
-                                                <i class="fas fa-history mr-1"></i>
-                                                History
-                                            </a>
-                                        </div>
-                                    </div>
-                                </div>
-                            </c:forEach>
-                        </div>
-                    </c:otherwise>
-                </c:choose>
+                    </div>
+                </c:forEach>
             </div>
         </div>
+    </c:if>
 
-    </div>
-</main>
+    <c:if test="${empty pendingValidations && empty todayConsultations && empty upcomingConsultations}">
+        <div class="bg-white rounded-lg shadow-md p-12 text-center">
+            <i class="fas fa-calendar-check text-gray-300 text-6xl mb-4"></i>
+            <h3 class="text-xl font-semibold text-gray-600 mb-2">No Appointments</h3>
+            <p class="text-gray-500">You have no scheduled or pending appointments at the moment.</p>
+        </div>
+    </c:if>
+
+</div>
 
 </body>
 </html>

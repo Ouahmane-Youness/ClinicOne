@@ -4,6 +4,7 @@ import com.example.clinic.entities.Consultation;
 import com.example.clinic.entities.Docteur;
 import com.example.clinic.entities.StatutConsultation;
 import com.example.clinic.service.ConsultationService;
+import com.example.clinic.service.DocteurService;
 import com.example.clinic.util.DateUtils;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.annotation.WebServlet;
@@ -17,17 +18,20 @@ import java.time.LocalDate;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 import java.util.stream.Collectors;
 
 @WebServlet("/doctor/dashboard")
 public class DoctorDashboardServlet extends HttpServlet {
 
     private ConsultationService consultationService;
+    private DocteurService docteurService;
 
     @Override
     public void init() throws ServletException {
         super.init();
         this.consultationService = new ConsultationService();
+        this.docteurService = new DocteurService();
     }
 
     @Override
@@ -51,6 +55,16 @@ public class DoctorDashboardServlet extends HttpServlet {
         Long docteurId = docteur.getId();
 
         try {
+            Optional<Docteur> docteurOpt = docteurService.getDocteurById(docteurId);
+
+            if (docteurOpt.isEmpty()) {
+                request.setAttribute("error", "Doctor not found");
+                request.getRequestDispatcher("/WEB-INF/views/error.jsp").forward(request, response);
+                return;
+            }
+
+            Docteur freshDocteur = docteurOpt.get();
+
             List<Consultation> todayConsultations =
                     consultationService.getConsultationsByDate(LocalDate.now()).stream()
                             .filter(c -> c.getDocteur().getId().equals(docteurId))
@@ -96,12 +110,13 @@ public class DoctorDashboardServlet extends HttpServlet {
             request.setAttribute("formattedDates", formattedDates);
             request.setAttribute("formattedShortDates", formattedShortDates);
             request.setAttribute("formattedTimes", formattedTimes);
-            request.setAttribute("docteur", docteur);
+            request.setAttribute("docteur", freshDocteur);
 
             request.getRequestDispatcher("/WEB-INF/views/doctor/dashboard.jsp")
                     .forward(request, response);
 
         } catch (Exception e) {
+            e.printStackTrace();
             request.setAttribute("error", "Error loading dashboard: " + e.getMessage());
             request.getRequestDispatcher("/WEB-INF/views/doctor/dashboard.jsp")
                     .forward(request, response);

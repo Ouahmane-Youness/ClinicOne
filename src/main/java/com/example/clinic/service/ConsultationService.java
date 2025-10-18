@@ -342,10 +342,13 @@ public class ConsultationService implements IConsultationService {
 
         return updated;
     }
+    public List<Consultation> getCompletedConsultationsForPatient(Long patientId) {
+        return consultationRepository.findCompletedByPatient(patientId);
+    }
 
     @Override
     public List<LocalTime> getAvailableTimeSlotsForDoctor(Long docteurId, LocalDate date) {
-        Optional<Docteur> docteurOpt = docteurRepository.findById(docteurId);
+        Optional<Docteur> docteurOpt = docteurRepository.findByIdWithSalle(docteurId);
         if (docteurOpt.isEmpty()) {
             throw new IllegalArgumentException("Doctor not found with ID: " + docteurId);
         }

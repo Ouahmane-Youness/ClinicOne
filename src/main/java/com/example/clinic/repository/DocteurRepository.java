@@ -47,6 +47,23 @@ public class DocteurRepository implements Repository<Docteur, Long> {
         }
     }
 
+    public Optional<Docteur> findByIdWithSalle(Long id) {
+        EntityManager em = JPAUtil.getEntityManager();
+
+        try {
+            TypedQuery<Docteur> query = em.createQuery(
+                    "SELECT d FROM Docteur d LEFT JOIN FETCH d.salle s LEFT JOIN FETCH s.creneauxOccupes WHERE d.id = :id",
+                    Docteur.class
+            );
+            query.setParameter("id", id);
+
+            List<Docteur> results = query.getResultList();
+            return results.isEmpty() ? Optional.empty() : Optional.of(results.get(0));
+        } finally {
+            em.close();
+        }
+    }
+
     @Override
     public List<Docteur> findAll() {
         EntityManager em = JPAUtil.getEntityManager();
@@ -170,10 +187,10 @@ public class DocteurRepository implements Repository<Docteur, Long> {
 
         try {
             TypedQuery<Docteur> query = em.createQuery(
-                    "SELECT d FROM Docteur d WHERE d.departement.idDepartement = :deptId",
+                    "SELECT d FROM Docteur d WHERE d.departement.idDepartement = :departementId",
                     Docteur.class
             );
-            query.setParameter("deptId", departementId);
+            query.setParameter("departementId", departementId);
             return query.getResultList();
         } finally {
             em.close();
@@ -185,10 +202,41 @@ public class DocteurRepository implements Repository<Docteur, Long> {
 
         try {
             TypedQuery<Docteur> query = em.createQuery(
-                    "SELECT d FROM Docteur d WHERE LOWER(d.specialite) LIKE LOWER(:specialite)",
+                    "SELECT d FROM Docteur d WHERE d.specialite = :specialite",
                     Docteur.class
             );
-            query.setParameter("specialite", "%" + specialite + "%");
+            query.setParameter("specialite", specialite);
+            return query.getResultList();
+        } finally {
+            em.close();
+        }
+    }
+
+    public Optional<Docteur> findBySalle(Long salleId) {
+        EntityManager em = JPAUtil.getEntityManager();
+
+        try {
+            TypedQuery<Docteur> query = em.createQuery(
+                    "SELECT d FROM Docteur d WHERE d.salle.idSalle = :salleId",
+                    Docteur.class
+            );
+            query.setParameter("salleId", salleId);
+
+            List<Docteur> results = query.getResultList();
+            return results.isEmpty() ? Optional.empty() : Optional.of(results.get(0));
+        } finally {
+            em.close();
+        }
+    }
+
+    public List<Docteur> findDoctorsWithoutRoom() {
+        EntityManager em = JPAUtil.getEntityManager();
+
+        try {
+            TypedQuery<Docteur> query = em.createQuery(
+                    "SELECT d FROM Docteur d WHERE d.salle IS NULL",
+                    Docteur.class
+            );
             return query.getResultList();
         } finally {
             em.close();
@@ -208,39 +256,6 @@ public class DocteurRepository implements Repository<Docteur, Long> {
             List<Docteur> results = query.getResultList();
             return results.isEmpty() ? null : results.get(0);
         } finally {
-            em.close();
-        }
-    }
-
-    // ✨ NEW: Find doctor assigned to a specific room
-    public Optional<Docteur> findBySalle(Long salleId)
-    {
-        EntityManager em = JPAUtil.getEntityManager();
-
-        try{
-            TypedQuery<Docteur> query = em.createQuery(
-                    "SELECT d FROM Docteur d WHERE d.salle.id = :salleId",
-                    Docteur.class
-            );
-            query.setParameter("salleId", salleId);
-            List<Docteur> results = query.getResultList();
-            return results.isEmpty() ? Optional.empty() : Optional.of(results.get(0));
-        }finally {
-            em.close();
-        }
-    }
-
-    // ✨ NEW: Find all doctors without assigned rooms
-    public List<Docteur> findDoctorsWithoutRoom()
-    {
-        EntityManager em = JPAUtil.getEntityManager();
-        try{
-            TypedQuery<Docteur> query = em.createQuery(
-                    "SELECT d FROM Docteur d where d.salle IS NULL", Docteur.class
-            );
-
-            return query.getResultList();
-        }finally {
             em.close();
         }
     }
