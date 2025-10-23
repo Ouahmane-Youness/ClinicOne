@@ -15,6 +15,7 @@ import jakarta.servlet.http.HttpSession;
 
 import java.io.IOException;
 import java.time.LocalDate;
+import java.time.LocalTime;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -68,6 +69,7 @@ public class DoctorDashboardServlet extends HttpServlet {
             List<Consultation> todayConsultations =
                     consultationService.getConsultationsByDate(LocalDate.now()).stream()
                             .filter(c -> c.getDocteur().getId().equals(docteurId))
+                            .filter(c -> c.getStatut() == StatutConsultation.VALIDEE)
                             .collect(Collectors.toList());
 
             List<Consultation> pendingValidations =
@@ -76,7 +78,22 @@ public class DoctorDashboardServlet extends HttpServlet {
                             .collect(Collectors.toList());
 
             List<Consultation> upcomingConsultations =
-                    consultationService.getUpcomingConsultationsForDocteur(docteurId);
+                    consultationService.getUpcomingConsultationsForDocteur(docteurId).stream()
+                            .filter(c -> c.getDate().isAfter(LocalDate.now()) ||
+                                    (c.getDate().equals(LocalDate.now()) && c.getHeure().isAfter(LocalTime.now())))
+                            .limit(5)
+                            .collect(Collectors.toList());
+
+            List<Consultation> recentCompleted =
+                    consultationService.getDocteurConsultations(docteurId).stream()
+                            .filter(c -> c.getStatut() == StatutConsultation.TERMINEE)
+                            .sorted((c1, c2) -> {
+                                int dateCompare = c2.getDate().compareTo(c1.getDate());
+                                if (dateCompare != 0) return dateCompare;
+                                return c2.getHeure().compareTo(c1.getHeure());
+                            })
+                            .limit(3)
+                            .collect(Collectors.toList());
 
             Map<Long, String> formattedDates = new HashMap<>();
             Map<Long, String> formattedShortDates = new HashMap<>();
@@ -104,13 +121,34 @@ public class DoctorDashboardServlet extends HttpServlet {
                 }
             }
 
+            for (Consultation c : recentCompleted) {
+                if (!formattedDates.containsKey(c.getIdConsultation())) {
+                    formattedDates.put(c.getIdConsultation(), DateUtils.formatDate(c.getDate()));
+                    formattedShortDates.put(c.getIdConsultation(), DateUtils.formatShortDate(c.getDate()));
+                    formattedTimes.put(c.getIdConsultation(), DateUtils.formatTime(c.getHeure()));
+                }
+            }
+
+            long totalPatients = consultationService.getDocteurConsultations(docteurId).stream()
+                    .map(c -> c.getPatient().getId())
+                    .distinct()
+                    .count();
+
+            long completedToday = consultationService.getConsultationsByDate(LocalDate.now()).stream()
+                    .filter(c -> c.getDocteur().getId().equals(docteurId))
+                    .filter(c -> c.getStatut() == StatutConsultation.TERMINEE)
+                    .count();
+
             request.setAttribute("todayConsultations", todayConsultations);
             request.setAttribute("pendingValidations", pendingValidations);
             request.setAttribute("upcomingConsultations", upcomingConsultations);
+            request.setAttribute("recentCompleted", recentCompleted);
             request.setAttribute("formattedDates", formattedDates);
             request.setAttribute("formattedShortDates", formattedShortDates);
             request.setAttribute("formattedTimes", formattedTimes);
             request.setAttribute("docteur", freshDocteur);
+            request.setAttribute("totalPatients", totalPatients);
+            request.setAttribute("completedToday", completedToday);
 
             request.getRequestDispatcher("/WEB-INF/views/doctor/dashboard.jsp")
                     .forward(request, response);

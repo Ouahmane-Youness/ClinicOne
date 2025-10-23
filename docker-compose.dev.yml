@@ -1,60 +1,50 @@
 services:
-  postgres:
-    image: postgres:latest
-    container_name: clinico_db
-    restart: always
-    environment:
-      POSTGRES_DB: clinico_db
-      POSTGRES_USER: admin
-      POSTGRES_PASSWORD: password
-    ports:
-      - "5432:5432"
-    volumes:
-      - postgres_data:/var/lib/postgresql/data
-#      - ./src/main/java/com/example/clinic/db/init.sql:/docker-entrypoint-initdb.d/init.sql
-    networks:
-      - clinico-network
-    healthcheck:
-      test: ["CMD-SHELL", "pg_isready -U admin -d clinico_db"]
-      interval: 10s
-      timeout: 5s
-      retries: 5
+#  postgres:
+#    image: postgres:latest
+#    container_name: clinico_db
+#    restart: always
+#    environment:
+#      POSTGRES_DB: clinico_db
+#      POSTGRES_USER: clinico-db
+#      POSTGRES_PASSWORD: clinico_password
+#    ports:
+#      - "5432:5432"
+#    volumes:
+#      - postgres_data:/var/lib/postgresql/data
+##      - ./src/main/java/com/example/clinic/db/init.sql:/docker-entrypoint-initdb.d/init.sql
+#    networks:
+#      - clinico-network
+#    healthcheck:
+#      test: ["CMD-SHELL", "pg_isready -U admin -d clinico_db"]
+#      interval: 10s
+#      timeout: 5s
+#      retries: 5
 
-  pgadmin:
-    image: dpage/pgadmin4:latest
-    container_name: pgadmin_clinico
-    restart: always
-    environment:
-      PGADMIN_DEFAULT_EMAIL: admin@admin.com
-      PGADMIN_DEFAULT_PASSWORD: admin
-    ports:
-      - "5050:80"
-    depends_on:
-      - postgres
-    networks:
-      - clinico-network
+#  pgadmin:
+#    image: dpage/pgadmin4:latest
+#    container_name: pgadmin_clinico
+#    restart: always
+#    environment:
+#      PGADMIN_DEFAULT_EMAIL: admin@admin.com
+#      PGADMIN_DEFAULT_PASSWORD: admin
+#    ports:
+#      - "5050:80"
+#    depends_on:
+#      - postgres
+#    networks:
+#      - clinico-network
 
   tomcat_app:
     build:
       context: .
       dockerfile: Dockerfile
     container_name: tomcat_clinico_dev
-    depends_on:
-      postgres:
-        condition: service_healthy
+
     ports:
       - "8080:8080"
-    networks:
-      - clinico-network
     volumes:
       - ./src/main/webapp/WEB-INF/views:/usr/local/tomcat/webapps/ROOT/WEB-INF/views
       - ./src/main/webapp/css:/usr/local/tomcat/webapps/ROOT/css
       - ./src/main/webapp/images:/usr/local/tomcat/webapps/ROOT/images
       - ./src/main/webapp/js:/usr/local/tomcat/webapps/ROOT/js
 
-volumes:
-  postgres_data:
-
-networks:
-  clinico-network:
-    driver: bridge

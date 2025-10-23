@@ -18,9 +18,9 @@
         <properties>
             <!-- ✅ JDBC connection (correct for your Docker setup) -->
             <property name="jakarta.persistence.jdbc.driver" value="org.postgresql.Driver"/>
-            <property name="jakarta.persistence.jdbc.url" value="jdbc:postgresql://clinico_db:5432/clinico_db"/>
-            <property name="jakarta.persistence.jdbc.user" value="admin"/>
-            <property name="jakarta.persistence.jdbc.password" value="password"/>
+            <property name="jakarta.persistence.jdbc.url" value="jdbc:postgresql://clinicodb.ctwe4ogusazi.eu-north-1.rds.amazonaws.com:5432/clinico_db"/>
+            <property name="jakarta.persistence.jdbc.user" value="clinico_admin"/>
+            <property name="jakarta.persistence.jdbc.password" value="clinico_password"/>
 
             <!-- ✅ Hibernate config -->
             <property name="hibernate.dialect" value="org.hibernate.dialect.PostgreSQLDialect"/>
